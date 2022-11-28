@@ -33,11 +33,11 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
+		 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ImageBackground
         style={styles.image}
         source={require('../../assets/images/bg.jpeg')}
       >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <View style={styles.box}>
             <Text style={styles.title}>Вхід</Text>
             <View style={styles.form}>
@@ -71,8 +71,8 @@ export default function LoginScreen({ navigation }) {
 					<Text  style={styles.textSingUp}>Немає акаунта? Зареєструватися</Text>
 				</Pressable>
           </View>
-        </TouchableWithoutFeedback>
       </ImageBackground>
+        </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
