@@ -12,6 +12,7 @@ import {
 import { Camera } from 'expo-camera';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, AntDesign, SimpleLineIcons } from '@expo/vector-icons';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
 const initialState = {
@@ -24,28 +25,22 @@ export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [state, setState] = useState(initialState);
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
-	(async () => {
-	  
-	  let { status } = await Location.requestForegroundPermissionsAsync();
-	  if (status !== 'granted') {
-		 setErrorMsg('Permission to access location was denied');
-		 return;
-	  }
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+      }
 
-	  let location = await Location.getCurrentPositionAsync({});
-	  setLocation(location);
-	})();
- }, []);
-
- let text = 'Waiting..';
- if (errorMsg) {
-	text = errorMsg;
- } else if (location) {
-	text = JSON.stringify(location);
- }
+      let location = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setLocation(coords);
+    })();
+  }, []);
 
   const takePhoto = async () => {
     const photoInfo = await camera.takePictureAsync();
@@ -57,7 +52,8 @@ export default function CreatePostsScreen({ navigation }) {
   };
 
   const sendPhoto = () => {
-    navigation.navigate('DefaultScreenPosts', { state });
+    const { photo, name, location } = state;
+    navigation.navigate('DefaultScreenPosts', { photo, name, location });
     Keyboard.dismiss();
     setState(initialState);
   };
@@ -97,15 +93,38 @@ export default function CreatePostsScreen({ navigation }) {
               placeholder="Назва..."
               value={state.name}
             />
-				<SimpleLineIcons name="location-pin" size={24} color="black" />
-            <TextInput
-              onChangeText={value =>
-                setState(prevState => ({ ...prevState, plase: value }))
-              }
-              style={styles.input}
-              placeholder="Місцевість..."
-              value={state.plase}
-            />
+            <View style={styles.locationInputBox}>
+              <SimpleLineIcons
+                name="location-pin"
+                size={24}
+                color="#BDBDBD"
+                style={styles.icon}
+              />
+              <TextInput
+                onChangeText={value =>
+                  setState(prevState => ({ ...prevState, plase: value }))
+                }
+                style={styles.locationInput}
+                placeholder="Місцевість..."
+                value={state.plase}
+              />
+              <MapView
+                region={{
+                  ...location,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+                showsUserLocation={true}
+              >
+                {location && (
+                  <Marker
+                    title="I am here"
+                    coordinate={location}
+                    description="Hello"
+                  />
+                )}
+              </MapView>
+            </View>
           </View>
           <TouchableOpacity
             onPress={sendPhoto}
@@ -158,6 +177,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderBottomWidth: 1,
     borderColor: '#BDBDBD',
+    fontSize: 16,
+  },
+  locationInputBox: {
+    paddingBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#BDBDBD',
+  },
+  icon: {
+    paddingRight: 5,
+  },
+  locationInput: {
+    fontSize: 16,
   },
   button: {
     marginHorizontal: 16,

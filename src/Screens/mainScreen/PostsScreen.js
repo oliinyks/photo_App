@@ -1,5 +1,4 @@
-import React, { useEffect, useState, FlatList } from 'react';
-import { View, Text, Image } from 'react-native';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import DefaultScreenPosts from '../nestedScreens/DefaultScreenPosts';
 import CommentsScreen from '../nestedScreens/CommentsScreen';
@@ -10,9 +9,9 @@ const NestedScreen = createStackNavigator();
 export default function PostsScreen(){
 	return(
 		<NestedScreen.Navigator>
-			<NestedScreen.Screen name="DefaultScreenPosts" component={DefaultScreenPosts}/>
-			<NestedScreen.Screen name="MapScreen" component={MapScreen}/>
-			<NestedScreen.Screen name="CommentsScreen" component={CommentsScreen}/>
+			<NestedScreen.Screen name="DefaultScreenPosts" options={{ headerShown: false }} component={DefaultScreenPosts}/>
+			<NestedScreen.Screen name="Карта" component={MapScreen}/>
+			<NestedScreen.Screen name="Коментарі" component={CommentsScreen}/>
 		</NestedScreen.Navigator>
 	)
 }
