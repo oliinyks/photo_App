@@ -12,19 +12,23 @@ import {
   TouchableWithoutFeedback,
   Pressable,
 } from 'react-native';
+import {authSignUpUser} from '../../redux/auth/authOperations'
+import { useDispatch } from 'react-redux';
 
 const initialState = {
-  login: '',
+	nickName: '',
   email: '',
   password: '',
 };
 
 export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
+	const dispatch = useDispatch();
 
-  const keyboardHide = () => {
+  const handleSubmit = () => {
     Keyboard.dismiss();
     console.log(state);
+	 dispatch(authSignUpUser(state));
     setState(initialState);
   };
 
@@ -43,11 +47,11 @@ export default function RegistrationScreen({ navigation }) {
             <View style={styles.form}>
               <TextInput
                 onChangeText={value =>
-                  setState(prevState => ({ ...prevState, login: value }))
+                  setState(prevState => ({ ...prevState, nickName: value }))
                 }
                 style={styles.input}
                 placeholder="Ім'я"
-                value={state.login}
+                value={state.nickName}
               />
               <TextInput
                 onChangeText={value =>
@@ -69,7 +73,7 @@ export default function RegistrationScreen({ navigation }) {
             </View>
 
             <TouchableOpacity
-              onPress={keyboardHide}
+              onPress={handleSubmit}
               activeOpacity={0.8}
               style={styles.button}
             >

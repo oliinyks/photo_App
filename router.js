@@ -1,11 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import RegistrationScreen from './src/Screens/auth/RegistrationScreen';
-import LoginScreen from './src/Screens/auth/LoginScreen';
-import PostsScreen from './src/Screens/mainScreen/PostsScreen';
-import CreatePostsScreen from './src/Screens/mainScreen/CreatePostsScreen';
-import ProfileScreen from './src/Screens/mainScreen/ProfileScreen';
+import RegistrationScreen from './src/screens/auth/RegistrationScreen';
+import LoginScreen from './src/screens/auth/LoginScreen';
+import PostsScreen from './src/screens/mainScreen/PostsScreen';
+import CreatePostsScreen from './src/screens/mainScreen/CreatePostsScreen';
+import ProfileScreen from './src/screens/mainScreen/ProfileScreen';
 import { Ionicons, AntDesign, Feather } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
