@@ -11,7 +11,7 @@ export default function DefaultScreenPosts({ route, navigation }) {
   }, [route.params]);
   return (
     <View>
-      {posts && (
+      {/* {posts && (
         <FlatList
           data={posts}
           keyExtractor={(item, index) => index.toString()}
@@ -25,7 +25,7 @@ export default function DefaultScreenPosts({ route, navigation }) {
             </View>
           )}
         />
-      )}
+      )} */}
       <Button
         title="Перейти до карт"
         onPress={() => navigation.navigate('Карта')}

@@ -12,6 +12,8 @@ import {
   TouchableWithoutFeedback,
   Pressable,
 } from 'react-native';
+import {authSignInUser} from '../../redux/auth/authOperations'
+import { useDispatch } from 'react-redux';
 
 const initialState = {
   email: '',
@@ -20,10 +22,11 @@ const initialState = {
 
 export default function LoginScreen({ navigation }) {
   const [state, setState] = useState(initialState);
+  const dispatch = useDispatch();
 
-  const keyboardHide = () => {
+  const handleSubmit = () => {
     Keyboard.dismiss();
-    console.log(state);
+	 dispatch(authSignInUser(state));
     setState(initialState);
   };
 
@@ -60,7 +63,7 @@ export default function LoginScreen({ navigation }) {
             </View>
 
             <TouchableOpacity
-              onPress={keyboardHide}
+              onPress={handleSubmit}
               activeOpacity={0.8}
               style={styles.button}
             >
