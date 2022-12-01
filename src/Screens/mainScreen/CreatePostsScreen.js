@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   StyleSheet,
@@ -12,50 +12,46 @@ import {
 import { Camera } from 'expo-camera';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, AntDesign, SimpleLineIcons } from '@expo/vector-icons';
-import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import db from '../../firebase/config';
 
 const initialState = {
   name: '',
   plase: '',
-  photo: '',
 };
 
 export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
+  const [photo, setPhoto] = useState(null);
   const [state, setState] = useState(initialState);
-  const [location, setLocation] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      setLocation(coords);
-    })();
-  }, []);
 
   const takePhoto = async () => {
-    const photoInfo = await camera.takePictureAsync();
-    setState(prevState => ({ ...prevState, photo: photoInfo.uri }));
+    const { uri } = await camera.takePictureAsync();
+    const location = await Location.getCurrentPositionAsync();
+    setPhoto(uri);
   };
 
   const closePhoto = () => {
-    setState(prevState => ({ ...prevState, photo: '' }));
+    setPhoto(null);
   };
 
   const sendPhoto = () => {
-    const { photo, name, location } = state;
-    navigation.navigate('DefaultScreenPosts', { photo, name, location });
-    Keyboard.dismiss();
-    setState(initialState);
+    uploadPhotoToServer();
+
+    navigation.navigate('DefaultScreenPosts', { photo });
+   //  Keyboard.dismiss();
+   //  setState(initialState);
+   //  setPhoto(null);
+  };
+
+  const uploadPhotoToServer = async () => {
+	const response = await fetch(photo);
+	const file = await response.blob();
+
+	const uniquePostId = Date.now().toString();
+
+	const data = await db.storage().ref(`postImage/${uniquePostId}`).put(file);
+	console.log("data", data);
   };
 
   return (
@@ -66,13 +62,13 @@ export default function CreatePostsScreen({ navigation }) {
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.container}>
           <Camera style={styles.camera} ref={setCamera}>
-            {state.photo ? (
+            {photo ? (
               <>
                 <TouchableOpacity onPress={closePhoto} style={styles.close}>
                   <AntDesign name="close" size={24} color="#fff" />
                 </TouchableOpacity>
                 <Image
-                  source={{ uri: state.photo }}
+                  source={{ uri: photo }}
                   style={{ height: 200, width: 200 }}
                 />
               </>
@@ -108,28 +104,13 @@ export default function CreatePostsScreen({ navigation }) {
                 placeholder="Місцевість..."
                 value={state.plase}
               />
-              <MapView
-                region={{
-                  ...location,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-                showsUserLocation={true}
-              >
-                {location && (
-                  <Marker
-                    title="I am here"
-                    coordinate={location}
-                    description="Hello"
-                  />
-                )}
-              </MapView>
             </View>
           </View>
           <TouchableOpacity
             onPress={sendPhoto}
             activeOpacity={0.8}
             style={styles.button}
+            // disabled={photo}
           >
             <Text style={styles.buttonText}>Опублікувати</Text>
           </TouchableOpacity>
