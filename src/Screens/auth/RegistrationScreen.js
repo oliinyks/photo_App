@@ -12,22 +12,22 @@ import {
   TouchableWithoutFeedback,
   Pressable,
 } from 'react-native';
-import {authSignUpUser} from '../../redux/auth/authOperations'
+import {authSignUpUser} from '../../redux/auth/authOperations';
 import { useDispatch } from 'react-redux';
 
 const initialState = {
-	nickName: '',
-  email: '',
-  password: '',
+	email: '',
+	password: '',
+  nickName: '',
 };
 
 export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
-	const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     Keyboard.dismiss();
-	 dispatch(authSignUpUser(state));
+	dispatch(authSignUpUser(state));
     setState(initialState);
   };
 
@@ -79,8 +79,8 @@ export default function RegistrationScreen({ navigation }) {
               <Text style={styles.buttonText}>Зареєструватися</Text>
             </TouchableOpacity>
             <Pressable onPress={() => navigation.navigate('LoginScreen')}>
-				<Text  style={styles.textLogIn}>Вже є акаунт? Ввійти</Text>
-				</Pressable>
+              <Text style={styles.textLogIn}>Вже є акаунт? Ввійти</Text>
+            </Pressable>
           </View>
         </TouchableWithoutFeedback>
       </ImageBackground>
@@ -144,6 +144,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#1B4371',
     fontFamily: 'RobotoRegular',
-	 backgroundColor: 'transparent',
+    backgroundColor: 'transparent',
   },
 });

@@ -13,9 +13,6 @@ export default function App() {
   });
 
   if (!fontsLoaded) return null;
-//   if (!db.apps.length) {
-//     firebase.initializeApp({});
-//   }
 
   return (
     <Provider store={store}>
@@ -23,6 +20,4 @@ export default function App() {
     </Provider>
   );
 }
-//asasa@sd.sd
-//dfgdf@khkj.gng
 

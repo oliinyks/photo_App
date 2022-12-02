@@ -13,7 +13,8 @@ import { Camera } from 'expo-camera';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import db from '../../firebase/config';
+import { addPost } from '../../redux/post/postOperations';
+import { useDispatch } from 'react-redux';
 
 const initialState = {
   name: '',
@@ -24,6 +25,7 @@ export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [state, setState] = useState(initialState);
+  const dispatch = useDispatch();
 
   const takePhoto = async () => {
     const { uri } = await camera.takePictureAsync();
@@ -39,19 +41,23 @@ export default function CreatePostsScreen({ navigation }) {
     uploadPhotoToServer();
 
     navigation.navigate('DefaultScreenPosts', { photo });
-   //  Keyboard.dismiss();
-   //  setState(initialState);
-   //  setPhoto(null);
+     Keyboard.dismiss();
+     setState(initialState);
+     setPhoto(null);
   };
 
   const uploadPhotoToServer = async () => {
-	const response = await fetch(photo);
-	const file = await response.blob();
+    const response = await fetch(photo);
+    const file = await response.blob();
+   //  const uniquePostId = Date.now().toString();
 
-	const uniquePostId = Date.now().toString();
+   const postPhoto =  await dispatch(addPost(file));
 
-	const data = await db.storage().ref(`postImage/${uniquePostId}`).put(file);
-	console.log("data", data);
+    //  const processedPhoto = await db
+    //    .storage()
+    //    .ref('postImage')
+    //    .child(uniquePostId)
+    //    .getDownloadURL();
   };
 
   return (
@@ -78,7 +84,7 @@ export default function CreatePostsScreen({ navigation }) {
               </TouchableOpacity>
             )}
           </Camera>
-          <Text style={styles.uploadText}>Загрузити світлину</Text>
+          <Text style={styles.uploadText}>Завантажте світлину</Text>
 
           <View style={styles.form}>
             <TextInput

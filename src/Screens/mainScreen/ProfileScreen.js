@@ -1,17 +1,18 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { authSignOutUser } from '../../redux/auth/authOperations';
 import { useDispatch } from 'react-redux';
+import {authSignOutUser} from '../../redux/auth/authOperations';
 
 export default function ProfileScreen() {
-  const dispatch = useDispatch();
-  const signOut = () => {
-    dispatch(authSignOutUser());
+	const dispatch = useDispatch();
+
+   const logout = async () => {
+	 dispatch(authSignOutUser())
   };
+
   return (
     <View>
-      <Text>3</Text>
-      <Button title="Sign out" onPress={signOut} />
+      <Button title="Sign out" onPress={logout} />
     </View>
   );
 }
