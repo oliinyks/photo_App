@@ -11,24 +11,77 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Pressable,
+  Alert,
 } from 'react-native';
-import {authSignUpUser} from '../../redux/auth/authOperations';
+import COLORS from '../../conts/colors';
+import { authSignUpUser } from '../../redux/auth/authOperations';
 import { useDispatch } from 'react-redux';
+import Loader from '../../components/Loader';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const initialState = {
-	email: '',
-	password: '',
+  email: '',
+  password: '',
   nickName: '',
 };
 
 export default function RegistrationScreen({ navigation }) {
   const [state, setState] = useState(initialState);
+  const [hidePassword, setHidePassword] = useState(true);
+  const [isFocused, setIsFocused] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
 
-  const handleSubmit = async () => {
+  const addInputValue = (name, value) => {
+    setState(prevState => ({ ...prevState, [name]: value }));
+  };
+
+  const handleSubmit = () => {
     Keyboard.dismiss();
-	dispatch(authSignUpUser(state));
+    let isValid = true;
+    if (!state.nickName) {
+      handleError('Будь ласка, введіть імʼя', 'nickName');
+      isValid = false;
+    }
+
+    if (!state.email) {
+      handleError('Будь ласка, введіть пошту', 'email');
+      isValid = false;
+    } else if (!state.email.match(/\S+@\S+\.\S+/)) {
+      handleError('Будь ласка, введіть коректно дані пошти', 'email');
+      isValid = false;
+    }
+
+    if (!state.password) {
+      handleError('Будь ласка, введіть пароль', 'password');
+      isValid = false;
+    } else if (state.password.length < 8) {
+      handleError(
+        'Довжина пароля повинна становити більше 8 символів',
+        'password'
+      );
+      isValid = false;
+    }
+
+    if (isValid) {
+      register();
+    }
+  };
+
+  const register = async () => {
+    setLoading(true);
+    dispatch(authSignUpUser(state));
     setState(initialState);
+    setLoading(false);
+  };
+
+  const handleError = (error, input) => {
+    setErrors(prevState => ({ ...prevState, [input]: error }));
+  };
+
+  const toggleFocuse = (name, boolean) => {
+    setIsFocused(prevState => ({ ...prevState, [name]: boolean }));
   };
 
   return (
@@ -36,6 +89,7 @@ export default function RegistrationScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
+      <Loader visible={loading} />
       <ImageBackground
         style={styles.image}
         source={require('../../assets/images/bg.jpeg')}
@@ -43,32 +97,91 @@ export default function RegistrationScreen({ navigation }) {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <View style={styles.box}>
             <Text style={styles.title}>Реєстрація</Text>
+
             <View style={styles.form}>
               <TextInput
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, nickName: value }))
-                }
-                style={styles.input}
+                onChangeText={value => addInputValue('nickName', value)}
+                onFocus={() => {
+                  toggleFocuse('nickName', true);
+                  handleError(null, 'nickName');
+                }}
+                onBlur={() => toggleFocuse('nickName', false)}
+                style={[
+                  styles.input,
+                  {
+                    borderColor: errors.nickName
+                      ? COLORS.error
+                      : isFocused.nickName
+                      ? COLORS.accent
+                      : COLORS.border,
+                  },
+                ]}
                 placeholder="Ім'я"
                 value={state.nickName}
               />
+              {errors && (
+                <Text style={styles.errorMessage}>{errors.nickName}</Text>
+              )}
+
               <TextInput
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, email: value }))
-                }
-                style={styles.input}
+                onChangeText={value => addInputValue('email', value)}
+                onFocus={() => {
+                  toggleFocuse('email', true);
+                  handleError(null, 'email');
+                }}
+                onBlur={() => toggleFocuse('email', false)}
+                style={[
+                  styles.input,
+                  {
+                    borderColor: errors.email
+                      ? COLORS.error
+                      : isFocused.email
+                      ? COLORS.accent
+                      : COLORS.border,
+                  },
+                ]}
                 placeholder="Електронна пошта"
                 value={state.email}
+                autoCorrect={false}
               />
-              <TextInput
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, password: value }))
-                }
-                style={styles.input}
-                placeholder="Пароль"
-                secureTextEntry
-                value={state.password}
-              />
+              {errors && (
+                <Text style={styles.errorMessage}>{errors.email}</Text>
+              )}
+
+              <View
+                style={[
+                  styles.input,
+                  {
+                    borderColor: errors.password
+                      ? COLORS.error
+                      : isFocused.password
+                      ? COLORS.accent
+                      : COLORS.border,
+                  },
+                ]}
+              >
+                <TextInput
+                  onChangeText={value => addInputValue('password', value)}
+                  onFocus={() => {
+                    toggleFocuse('password', true);
+                    handleError(null, 'password');
+                  }}
+                  onBlur={() => toggleFocuse('password', false)}
+                  style={{ flex: 1 }}
+                  placeholder="Пароль"
+                  secureTextEntry={hidePassword}
+                  value={state.password}
+                  autoCorrect={false}
+                />
+                <Icon
+                  onPress={() => setHidePassword(!hidePassword)}
+                  name={hidePassword ? 'eye-outline' : 'eye-off-outline'}
+                  style={styles.icon}
+                />
+              </View>
+              {errors && (
+                <Text style={styles.errorMessage}>{errors.password}</Text>
+              )}
             </View>
 
             <TouchableOpacity
@@ -102,48 +215,66 @@ const styles = StyleSheet.create({
     fontFamily: 'RobotoRegular',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.primaryBg,
   },
   title: {
     marginBottom: 33,
     textAlign: 'center',
     fontSize: 30,
     fontFamily: 'RobotoMedium',
-    color: '#212121',
+    color: COLORS.primaryText,
   },
   form: {
     marginHorizontal: 16,
     marginBottom: 27,
   },
   input: {
+    flexDirection: 'row',
     marginBottom: 16,
     height: 50,
     padding: 16,
     borderWidth: 1,
     borderRadius: 8,
-    borderColor: '#E8E8E8',
-    backgroundColor: '#F6F6F6;',
-    placeholderTextColor: '#BDBDBD',
+    backgroundColor: COLORS.secondaryBg,
+    placeholderTextColor: COLORS.secondaryText,
     fontFamily: 'RobotoRegular',
+  },
+  errorMessage: {
+    marginBottom: 15,
+    color: COLORS.error,
+    fontSize: 12,
+  },
+  icon: {
+    fontSize: 18,
+  },
+  passwordBox: {
+    height: 55,
+    backgroundColor: COLORS.light,
+    flexDirection: 'row',
+    paddingHorizontal: 15,
+    borderWidth: 0.5,
   },
   button: {
     marginHorizontal: 16,
     marginBottom: 16,
     height: 50,
     borderRadius: 100,
-    backgroundColor: '#FF6C00',
+    backgroundColor: COLORS.accent,
     justifyContent: 'center',
     fontFamily: 'RobotoRegular',
   },
   buttonText: {
     textAlign: 'center',
-    color: '#fff',
+    color: COLORS.primaryBg,
   },
   textLogIn: {
     marginBottom: 78,
     textAlign: 'center',
-    color: '#1B4371',
+    color: COLORS.link,
     fontFamily: 'RobotoRegular',
     backgroundColor: 'transparent',
   },
 });
+
+
+//aaa@aaa.aaa

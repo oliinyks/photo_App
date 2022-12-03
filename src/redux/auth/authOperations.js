@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
+import {Alert} from 'react-native';
 import { authSlice } from './authReducer';
 
 const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
@@ -16,7 +17,6 @@ export const authSignUpUser =
   async dispatch => {
     try {
       const user = await createUserWithEmailAndPassword(auth, email, password);
-      console.log(user);
 
       await updateProfile(auth.currentUser, {
         displayName: nickName,
@@ -29,9 +29,7 @@ export const authSignUpUser =
 
       dispatch(updateUserProfile(userUpdateProfile));
     } catch (error) {
-      console.log('error', error);
-
-      console.log('error.message', error.message);
+		Alert.alert('Ця електронна адреса вже використовується');
     }
   };
 
@@ -40,11 +38,8 @@ export const authSignInUser =
   async () => {
     try {
       const user = await signInWithEmailAndPassword(auth, email, password);
-      console.log('user', user);
     } catch (error) {
-      console.log('error', error);
-      console.log('error.code', error.code);
-      console.log('error.message', error.message);
+      Alert.alert('Електронна адреса або пароль невірний');
     }
   };
 

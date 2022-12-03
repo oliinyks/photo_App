@@ -9,12 +9,15 @@ import {
   Keyboard,
   TextInput,
 } from 'react-native';
+import COLORS from '../../conts/colors';
 import { Camera } from 'expo-camera';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { addPost } from '../../redux/post/postOperations';
 import { useDispatch } from 'react-redux';
+import { onAuthStateChanged, getAuth, } from 'firebase/auth';
+ import { authSlice } from '../../redux/auth/authReducer';
 
 const initialState = {
   name: '',
@@ -29,7 +32,7 @@ export default function CreatePostsScreen({ navigation }) {
 
   const takePhoto = async () => {
     const { uri } = await camera.takePictureAsync();
-    const location = await Location.getCurrentPositionAsync();
+    const location = await Location.getCurrentPositionAsync({ accuracy: 1 });
     setPhoto(uri);
   };
 
@@ -41,18 +44,21 @@ export default function CreatePostsScreen({ navigation }) {
     uploadPhotoToServer();
 
     navigation.navigate('DefaultScreenPosts', { photo });
-     Keyboard.dismiss();
-     setState(initialState);
-     setPhoto(null);
+    Keyboard.dismiss();
+    setState(initialState);
+    setPhoto(null);
   };
 
   const uploadPhotoToServer = async () => {
     const response = await fetch(photo);
     const file = await response.blob();
-   //  const uniquePostId = Date.now().toString();
-
-   const postPhoto =  await dispatch(addPost(file));
-
+	//  const uid = null;
+	//  const auth = getAuth();
+	//  await onAuthStateChanged(auth, currentUser => {
+	// 	uid = currentUser;
+	//  });
+   //  const ref = 'images/';
+   //  const imgRef = await uploadFile(ref, uid, file);
     //  const processedPhoto = await db
     //    .storage()
     //    .ref('postImage')
@@ -137,10 +143,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    backgroundColor: '#E8E8E8',
+    backgroundColor: COLORS.border,
   },
   cameraFrame: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.primaryBg,
     borderWidth: 1,
     borderColor: 'transparent',
     borderRadius: 50,
@@ -152,7 +158,7 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     marginBottom: 32,
-    color: '#BDBDBD',
+    color: COLORS.secondaryText,
   },
   takePhotoContainer: {},
   form: {
@@ -163,7 +169,7 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     marginBottom: 15,
     borderBottomWidth: 1,
-    borderColor: '#BDBDBD',
+    borderColor: COLORS.secondaryText,
     fontSize: 16,
   },
   locationInputBox: {
@@ -171,7 +177,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderColor: '#BDBDBD',
+    borderColor: COLORS.secondaryText,
   },
   icon: {
     paddingRight: 5,
@@ -184,12 +190,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     height: 50,
     borderRadius: 100,
-    backgroundColor: '#FF6C00',
+    backgroundColor: COLORS.accent,
     justifyContent: 'center',
     fontFamily: 'RobotoRegular',
   },
   buttonText: {
     textAlign: 'center',
-    color: '#fff',
+    color: COLORS.primaryBg,
   },
 });
