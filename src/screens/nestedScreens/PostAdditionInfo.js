@@ -15,14 +15,12 @@ import { SimpleLineIcons } from '@expo/vector-icons';
 import { ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../firebase/config';
 import { v4 } from 'uuid';
-
-const initialState = {
-  name: '',
-  plase: '',
-};
+import * as Location from 'expo-location';
 
 export default function PostAdditionInfo({ navigation, route }) {
-  const [state, setState] = useState(initialState);
+  const [name, setName] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
   let { photo } = route.params;
 
   useEffect(() => {
@@ -31,13 +29,32 @@ export default function PostAdditionInfo({ navigation, route }) {
     }
   }, [photo]);
 
+  useEffect(() => {
+	(async () => {
+	  
+	  let { status } = await Location.requestForegroundPermissionsAsync();
+	  if (status !== 'granted') {
+		 setErrorMsg('У доступі до місцезнаходження відмовлено');
+		 return;
+	  }
+
+	  let location = await Location.getCurrentPositionAsync({});
+	  setLocation(location);
+	})();
+ }, []);
+
+ let text = 'Очікування..';
+ if (errorMsg) {
+	text = errorMsg;
+ } else if (location) {
+	text = JSON.stringify(location);
+ }
+
   function sendPhoto() {
     uploadPhotoToServer();
 
-    navigation.navigate('DefaultScreenPosts', { photo });
     Keyboard.dismiss();
-    setState(initialState);
-    photo = null;
+    navigation.navigate('DefaultScreenPosts', { photo });
   }
 
   const uploadPhotoToServer = async () => {
@@ -60,12 +77,10 @@ export default function PostAdditionInfo({ navigation, route }) {
 
           <View style={styles.form}>
             <TextInput
-              onChangeText={value =>
-                setState(prevState => ({ ...prevState, name: value }))
-              }
+              onChangeText={setName}
               style={styles.input}
               placeholder="Назва..."
-              value={state.name}
+              value={name}
             />
             <View style={styles.locationInputBox}>
               <SimpleLineIcons
@@ -75,12 +90,10 @@ export default function PostAdditionInfo({ navigation, route }) {
                 style={styles.icon}
               />
               <TextInput
-                onChangeText={value =>
-                  setState(prevState => ({ ...prevState, plase: value }))
-                }
+                onChangeText={setLocation}
                 style={styles.locationInput}
-                placeholder="Місцевість..."
-                value={state.plase}
+               //  placeholder={text}
+                value={text}
               />
             </View>
           </View>

@@ -32,11 +32,11 @@ export default function CreatePostsScreen({ navigation }) {
   }, []);
 
   if (hasCameraPermission === undefined) {
-    return <Text>Requesting permissions...</Text>;
+    return <Text>Очікування дозволу...</Text>;
   } else if (!hasCameraPermission) {
     return (
       <Text>
-        Permission for camera not granted. Please change this in settings.
+			У доступі до камери відмовлено. Будь ласка, змініть налаштування.
       </Text>
     );
   }
@@ -49,8 +49,6 @@ export default function CreatePostsScreen({ navigation }) {
   if (photo) {
     let savePhoto = () => {
       MediaLibrary.saveToLibraryAsync(photo).then(() => {
-        // setPhoto(photo);
-        // setPhoto(null);
         navigation.navigate('Пост', { photo });
       });
     };
@@ -72,12 +70,10 @@ export default function CreatePostsScreen({ navigation }) {
       aspect: [4, 3],
       quality: 1,
     });
-    console.log("🚀 ~ file: CameraScreen.js:75 ~ choosePhotoFromLibrary ~ result", result)
+
     setLoading(false);
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
-      // navigation.navigate('Пост', { photo });
-      // setPhoto(null);
     }
   };
 
