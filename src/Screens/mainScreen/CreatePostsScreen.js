@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   StyleSheet,
@@ -13,11 +13,20 @@ import COLORS from '../../conts/colors';
 import { Camera } from 'expo-camera';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, AntDesign, SimpleLineIcons } from '@expo/vector-icons';
+import * as MediaLibrary from "expo-media-library";
 import * as Location from 'expo-location';
 import { addPost } from '../../redux/post/postOperations';
 import { useDispatch } from 'react-redux';
 import { onAuthStateChanged, getAuth, } from 'firebase/auth';
  import { authSlice } from '../../redux/auth/authReducer';
+ import {
+	ref,
+	uploadBytes,
+	getDownloadURL,
+	getStorage
+ } from "firebase/storage";
+ import { storage } from '../../firebase/config'
+ import { v4 } from "uuid";
 
 const initialState = {
   name: '',
@@ -25,14 +34,30 @@ const initialState = {
 };
 
 export default function CreatePostsScreen({ navigation }) {
+	const [hasPermission, setHasPermission] = useState(null);
+	const [type, setType] = useState(Camera.Constants.Type.back);
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [state, setState] = useState(initialState);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+	(async () => {
+	  const { status } = await Camera.requestCameraPermissionsAsync();
+	  await MediaLibrary.requestPermissionsAsync();
+
+	  setHasPermission(status === "granted");
+	})();
+ }, []);
+
+ if (hasPermission === false) {
+	return <Text>No access to camera</Text>;
+ }
+
   const takePhoto = async () => {
+	console.log('ddd')
     const { uri } = await camera.takePictureAsync();
-    const location = await Location.getCurrentPositionAsync({ accuracy: 1 });
+   //  const location = await Location.getCurrentPositionAsync({ accuracy: 1 });
     setPhoto(uri);
   };
 
@@ -49,21 +74,16 @@ export default function CreatePostsScreen({ navigation }) {
     setPhoto(null);
   };
 
-  const uploadPhotoToServer = async () => {
+  const uploadPhotoToServer = async() => {
     const response = await fetch(photo);
-    const file = await response.blob();
-	//  const uid = null;
-	//  const auth = getAuth();
-	//  await onAuthStateChanged(auth, currentUser => {
-	// 	uid = currentUser;
-	//  });
-   //  const ref = 'images/';
-   //  const imgRef = await uploadFile(ref, uid, file);
-    //  const processedPhoto = await db
-    //    .storage()
-    //    .ref('postImage')
-    //    .child(uniquePostId)
-    //    .getDownloadURL();
+	 const file = await response.blob();
+	 const imageRef = ref(storage, `${file.name + v4()}`);
+	 uploadBytes(imageRef, file)
+	//  .then((snapshot) => {
+   //    getDownloadURL(snapshot.ref).then((url) => {
+   //    //   setImageUrls((prev) => [...prev, url]);
+   //    });
+   //  });
   };
 
   return (
@@ -85,7 +105,8 @@ export default function CreatePostsScreen({ navigation }) {
                 />
               </>
             ) : (
-              <TouchableOpacity style={styles.cameraFrame} onPress={takePhoto}>
+              <TouchableOpacity style={styles.cameraFrame} onPress={()=>
+				 takePhoto()}>
                 <MaterialIcons name="photo-camera" size={24} color="#BDBDBD" />
               </TouchableOpacity>
             )}
