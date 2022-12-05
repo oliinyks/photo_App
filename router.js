@@ -41,6 +41,7 @@ export const useRoute = isAuth => {
       />
       <MainTab.Screen
         options={{
+			headerShown: false,
           tabBarIcon: ({ color }) => (
             <AntDesign name="plus" size={24} color={color} />
           ),
