@@ -14,7 +14,11 @@ import COLORS from '../../conts/colors';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { addDoc, collection, setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { storage, db } from '../../firebase/config';
 import { v4 } from 'uuid';
 import * as Location from 'expo-location';
@@ -24,9 +28,8 @@ export default function PostAdditionInfo({ navigation, route }) {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   let { photo } = route.params;
-  console.log("🚀 ~ file: PostAdditionInfo.js:27 ~ PostAdditionInfo ~ photo", photo)
 
-  const {userId, nickName} = useSelector(state => state.auth);
+  const { userId, nickName } = useSelector(state => state.auth);
 
   useEffect(() => {
     if (!photo) {
@@ -58,38 +61,35 @@ export default function PostAdditionInfo({ navigation, route }) {
     uploadPostToServer();
     Keyboard.dismiss();
     navigation.navigate('DefaultScreenPosts', { photo });
-	 photo = null;
+    photo = null;
   }
 
   const uploadPostToServer = async () => {
-	const response = await fetch(photo);
-	const file = await response.blob();
-	const imageRef = ref(storage, `${v4()}`);
+    const response = await fetch(photo);
+    const file = await response.blob();
+    const imageRef = ref(storage, `${v4()}`);
 
-  uploadBytes(imageRef, file).then((snapshot) => {
-	  getDownloadURL(snapshot.ref).then((url) => {
-		newPost(url);
-	  });
-	});
+    uploadBytes(imageRef, file).then(snapshot => {
+      getDownloadURL(snapshot.ref).then(url => {
+        newPost(url);
+      });
+    });
   };
 
-  const newPost = async (url) => {
-  console.log("🚀 ~ file: PostAdditionInfo.js:97 ~ newPost ~ url", url)
-	try {
+  const newPost = async url => {
+    try {
       const docRef = await addDoc(collection(db, 'users'), {
         photo: url,
         name,
         location: location.coords,
-		  userId, 
-		  nickName,
-		  timeStamp: serverTimestamp(),
+        userId,
+        nickName,
+        timeStamp: serverTimestamp(),
       });
-
-      console.log('Document written with ID: ', docRef.id);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
-  }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   img: {
     height: 250,
     width: 250,
-	 resizeMode : 'contain',
+    resizeMode: 'contain',
   },
   form: {
     marginBottom: 17,

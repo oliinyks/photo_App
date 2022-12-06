@@ -8,19 +8,12 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
-import * as ImagePicker from 'expo-image-picker';
-import COLORS from '../../conts/colors';
-import Loader from '../../components/Loader';
 
 export default function CreatePostsScreen({ navigation }) {
-  //   let cameraRef = useRef();
   const [camera, setCamera] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const [loading, setLoading] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState();
   const [photo, setPhoto] = useState(null);
 
@@ -64,7 +57,6 @@ export default function CreatePostsScreen({ navigation }) {
 
   return (
     <Camera style={styles.container} ref={setCamera}>
-      {loading && <Loader />}
       <View style={styles.box}>
         <TouchableOpacity onPress={takePic}>
           <View style={styles.takePhotoOut}>

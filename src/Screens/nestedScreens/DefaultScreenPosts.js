@@ -1,54 +1,55 @@
-import React, { useEffect, useState, FlatList } from 'react';
-import { View, Text, Image, Button } from 'react-native';
-import { ref, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../redux/store';
-import { v4 } from 'uuid';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, Button, FlatList } from 'react-native';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
-export default function DefaultScreenPosts({ navigation, route }) {
-//   const [posts, setPosts] = useState([]);
+export default function DefaultScreenPosts({ navigation }) {
+  const [posts, setPosts] = useState([]);
 
-//   useEffect(() => {
-//     // if (route.params) {
-//     // 	listAll(route.params).then((response)=>{
-//     // 		response.items.forEach((item)=>{
-//     // 			getDownloadURL(item).then((url)=>{
-//     // 				setPosts(prevState => [...prevState, url]);
-//     // 			})
-//     // 		})
-//     // 	})
-//     // const pathReference = ref(storage, `${v4()}`);
-//     //  }
-//     getDownloadURL(ref(storage, `${v4()}`));
-//   }, []);
+  useEffect(() => {
+	const getAllPost = async () => {
+		let list = [];
+		try {
+		  const querySnapshot = await getDocs(collection(db, 'users'));
+		  querySnapshot.forEach(doc => {
+			 list.push({ id: doc.id, ...doc.data()});
+		  });
+		  setPosts(list);
+		} catch (error) {
+		  console.log('error', error);
+		}
+	 };
+	 getAllPost();
+  }, []);
 
-//   return (
-//     <View>
-//       {posts.map(url => {
-//         return (
-//           <Image source={{ uri: url }} style={{ width: 350, height: 200 }} />
-//         );
-//       })}
-//       {/* <FlatList
-//           data={posts}
-//           keyExtractor={(item, index) => index.toString()}
-//           renderItem={({ item }) => (
-//             <View>
-//               <Image
-//               source={{ uri: item.photo }}
-//               style={{ width: 350, height: 200 }}
-//             />
-//             </View>
-//           )}
-//         /> */}
-//       {}
-//       <Button
-//         title="Перейти до карт"
-//         onPress={() => navigation.navigate('Карта')}
-//       />
-//       <Button
-//         title="Перейти до коментарів"
-//         onPress={() => navigation.navigate('Коментарі')}
-//       />
-//     </View>
-//   );
+  return (
+    <View>
+      <FlatList
+        data={posts}
+        keyExtractor={(item, indx) => indx.toString()}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              marginBottom: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Image
+              source={{ uri: item.photo }}
+              style={{ width: 350, height: 200 }}
+            />
+          </View>
+        )}
+      />
+      <Button
+        title="Перейти до карт"
+        onPress={() => navigation.navigate('Карта')}
+      />
+      <Button
+        title="Перейти до коментарів"
+        onPress={() => navigation.navigate('Коментарі')}
+      />
+    </View>
+  );
 }
