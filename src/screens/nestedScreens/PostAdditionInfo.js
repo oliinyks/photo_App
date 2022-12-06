@@ -13,8 +13,8 @@ import { useSelector } from 'react-redux';
 import COLORS from '../../conts/colors';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SimpleLineIcons } from '@expo/vector-icons';
-import { ref, uploadBytes } from 'firebase/storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { addDoc, collection, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { storage, db } from '../../firebase/config';
 import { v4 } from 'uuid';
 import * as Location from 'expo-location';
@@ -23,8 +23,8 @@ export default function PostAdditionInfo({ navigation, route }) {
   const [name, setName] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [imageRef, setImageRef] = useState(null);
   let { photo } = route.params;
+  console.log("🚀 ~ file: PostAdditionInfo.js:27 ~ PostAdditionInfo ~ photo", photo)
 
   const {userId, nickName} = useSelector(state => state.auth);
 
@@ -57,41 +57,39 @@ export default function PostAdditionInfo({ navigation, route }) {
   function createPost() {
     uploadPostToServer();
     Keyboard.dismiss();
-   //  photo = null;
     navigation.navigate('DefaultScreenPosts', { photo });
+	 photo = null;
   }
 
   const uploadPostToServer = async () => {
-	await uploadPhotoToServer();
-	  const photo = await imageRef;
-	  console.log("🚀 .js:73 ~ docRef ~ photo", photo) //приходить  null
-    try {
+	const response = await fetch(photo);
+	const file = await response.blob();
+	const imageRef = ref(storage, `${v4()}`);
+
+  uploadBytes(imageRef, file).then((snapshot) => {
+	  getDownloadURL(snapshot.ref).then((url) => {
+		newPost(url);
+	  });
+	});
+  };
+
+  const newPost = async (url) => {
+  console.log("🚀 ~ file: PostAdditionInfo.js:97 ~ newPost ~ url", url)
+	try {
       const docRef = await addDoc(collection(db, 'users'), {
-        photo,
+        photo: url,
         name,
         location: location.coords,
 		  userId, 
-		  nickName
+		  nickName,
+		  timeStamp: serverTimestamp(),
       });
 
       console.log('Document written with ID: ', docRef.id);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
-  };
-
-  const uploadPhotoToServer = async () => {
-    const response = await fetch(photo);
-    console.log("🚀 .js:85 ~ uploadPhotoToServer ~ photo", photo)
-    const file = await response.blob();
-    const imageRef = ref(storage, `${v4()}`);
-   uploadBytes(imageRef, file).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
-      console.log("🚀 ~ file: PostAdditionInfo.js:90 ~ getDownloadURL ~ url", url) //не спрацьовує
-			setImageRef( url);
-      });
-    });
-  };
+  }
 
   return (
     <KeyboardAvoidingView
@@ -151,6 +149,7 @@ const styles = StyleSheet.create({
   img: {
     height: 250,
     width: 250,
+	 resizeMode : 'contain',
   },
   form: {
     marginBottom: 17,

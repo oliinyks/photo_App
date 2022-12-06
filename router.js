@@ -51,6 +51,7 @@ export const useRoute = isAuth => {
       />
       <MainTab.Screen
         options={{
+			headerShown: false,
           tabBarIcon: ({ color }) => (
             <Feather name="user" size={24} color={color} />
           ),

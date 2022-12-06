@@ -158,7 +158,7 @@ export default function LoginScreen({ navigation }) {
               activeOpacity={0.8}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Зареєструватися</Text>
+              <Text style={styles.buttonText}>Ввійти</Text>
             </TouchableOpacity>
             <Pressable
               onPress={() => navigation.navigate('RegistrationScreen')}

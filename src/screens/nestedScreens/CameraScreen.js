@@ -62,51 +62,14 @@ export default function CreatePostsScreen({ navigation }) {
     );
   }
 
-  const choosePhotoFromLibrary = async () => {
-    setLoading(true);
-    let result = await ImagePicker.launchImageLibraryAsync({
-		allowsEditing: true,
-      selectionLimit: 1,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    setLoading(false);
-    if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
-    }
-  };
-
-
   return (
     <Camera style={styles.container} ref={setCamera}>
       {loading && <Loader />}
       <View style={styles.box}>
-        <TouchableOpacity
-          onPress={() => {
-            setType(
-              type === Camera.Constants.Type.back
-                ? Camera.Constants.Type.front
-                : Camera.Constants.Type.back
-            );
-          }}
-        >
-          <MaterialIcons
-            name="flip-camera-ios"
-            size={40}
-            color={COLORS.secondaryText}
-          />
-        </TouchableOpacity>
         <TouchableOpacity onPress={takePic}>
           <View style={styles.takePhotoOut}>
             <View style={styles.takePhotoInner}></View>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.panelButton}
-          onPress={choosePhotoFromLibrary}
-        >
-          <View style={styles.panelButtonBox}></View>
         </TouchableOpacity>
       </View>
       <StatusBar style="auto" />
@@ -119,26 +82,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
   },
-  buttonContainer: {
-    backgroundColor: '#fff',
-    alignSelf: 'flex-end',
-  },
   preview: {
-    alignSelf: 'stretch',
+	marginHorizontal: 10,
+	resizeMode : 'contain',
     flex: 1,
   },
   box: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
-  flip: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center',
-  },
-
   takePhotoOut: {
     borderWidth: 2,
     borderColor: 'white',
@@ -149,7 +102,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 50,
   },
-
   takePhotoInner: {
     borderWidth: 2,
     borderColor: 'white',
@@ -157,11 +109,5 @@ const styles = StyleSheet.create({
     width: 50,
     backgroundColor: 'white',
     borderRadius: 50,
-  },
-  panelButton: {
-    height: 37,
-    width: 37,
-    borderRadius: 5,
-    backgroundColor: COLORS.secondaryText,
   },
 });
