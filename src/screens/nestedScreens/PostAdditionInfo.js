@@ -9,11 +9,13 @@ import {
   Keyboard,
   TextInput,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import COLORS from '../../conts/colors';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { ref, uploadBytes } from 'firebase/storage';
-import { storage } from '../../firebase/config';
+import { addDoc, collection } from 'firebase/firestore';
+import { storage, db } from '../../firebase/config';
 import { v4 } from 'uuid';
 import * as Location from 'expo-location';
 
@@ -21,7 +23,10 @@ export default function PostAdditionInfo({ navigation, route }) {
   const [name, setName] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [imageRef, setImageRef] = useState(null);
   let { photo } = route.params;
+
+  const {userId, nickName} = useSelector(state => state.auth);
 
   useEffect(() => {
     if (!photo) {
@@ -30,38 +35,62 @@ export default function PostAdditionInfo({ navigation, route }) {
   }, [photo]);
 
   useEffect(() => {
-	(async () => {
-	  
-	  let { status } = await Location.requestForegroundPermissionsAsync();
-	  if (status !== 'granted') {
-		 setErrorMsg('У доступі до місцезнаходження відмовлено');
-		 return;
-	  }
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('У доступі до місцезнаходження відмовлено');
+        return;
+      }
 
-	  let location = await Location.getCurrentPositionAsync({});
-	  setLocation(location);
-	})();
- }, []);
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
+  }, []);
 
- let text = 'Очікування..';
- if (errorMsg) {
-	text = errorMsg;
- } else if (location) {
-	text = JSON.stringify(location);
- }
+  let text = 'Очікування..';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
 
-  function sendPhoto() {
-    uploadPhotoToServer();
-
+  function createPost() {
+    uploadPostToServer();
     Keyboard.dismiss();
+   //  photo = null;
     navigation.navigate('DefaultScreenPosts', { photo });
   }
 
+  const uploadPostToServer = async () => {
+	await uploadPhotoToServer();
+	  const photo = await imageRef;
+	  console.log("🚀 .js:73 ~ docRef ~ photo", photo) //приходить  null
+    try {
+      const docRef = await addDoc(collection(db, 'users'), {
+        photo,
+        name,
+        location: location.coords,
+		  userId, 
+		  nickName
+      });
+
+      console.log('Document written with ID: ', docRef.id);
+    } catch (e) {
+      console.error('Error adding document: ', e);
+    }
+  };
+
   const uploadPhotoToServer = async () => {
     const response = await fetch(photo);
+    console.log("🚀 .js:85 ~ uploadPhotoToServer ~ photo", photo)
     const file = await response.blob();
     const imageRef = ref(storage, `${v4()}`);
-    uploadBytes(imageRef, file);
+   uploadBytes(imageRef, file).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then((url) => {
+      console.log("🚀 ~ file: PostAdditionInfo.js:90 ~ getDownloadURL ~ url", url) //не спрацьовує
+			setImageRef( url);
+      });
+    });
   };
 
   return (
@@ -92,13 +121,13 @@ export default function PostAdditionInfo({ navigation, route }) {
               <TextInput
                 onChangeText={setLocation}
                 style={styles.locationInput}
-               //  placeholder={text}
+                //  placeholder={text}
                 value={text}
               />
             </View>
           </View>
           <TouchableOpacity
-            onPress={sendPhoto}
+            onPress={createPost}
             activeOpacity={0.8}
             style={styles.button}
           >

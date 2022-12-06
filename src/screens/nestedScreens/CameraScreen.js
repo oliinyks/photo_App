@@ -77,6 +77,7 @@ export default function CreatePostsScreen({ navigation }) {
     }
   };
 
+
   return (
     <Camera style={styles.container} ref={setCamera}>
       {loading && <Loader />}
