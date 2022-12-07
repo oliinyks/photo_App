@@ -32,6 +32,7 @@ export const useRoute = isAuth => {
     <MainTab.Navigator screenOptions={{ tabBarShowLabel: false }}>
       <MainTab.Screen
         options={{
+			headerShown: false,
           tabBarIcon: ({ color }) => (
             <Ionicons name="grid-outline" size={24} color={color} />
           ),

@@ -2,39 +2,45 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Button,
   FlatList,
   StyleSheet,
   ImageBackground,
+  Image,
+  Button,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import COLORS from '../../conts/colors';
 import { authSignOutUser } from '../../redux/auth/authOperations';
 import { useSelector } from 'react-redux';
 import { Entypo } from '@expo/vector-icons';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { storage, db } from '../../firebase/config';
-import { v4 } from 'uuid';
-import { async } from '@firebase/util';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
 export default function ProfileScreen() {
-  const [file, setFile] = useState('');
-  const { nickName } = useSelector(state => state.auth);
+  const [allPosts, setAllPosts] = useState([]);
+  const { nickName, userId } = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const uploadFile = async () => {
-      const imageRef = ref(storage, `${v4()}`);
+      let list = [];
+      try {
+        const q = query(
+          collection(db, 'users'),
+          where('userId', '==', `${userId}`)
+        );
 
-      uploadBytes(imageRef, file).then(snapshot => {
-        getDownloadURL(snapshot.ref).then(url => {
-          setFile(url);
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
         });
-      });
+        setAllPosts(list);
+      } catch (error) {
+        console.log('error', error);
+      }
     };
-	 file && uploadFile();
-  }, [file]);
+    uploadFile();
+  }, []);
 
   const logout = async () => {
     dispatch(authSignOutUser());
@@ -47,7 +53,6 @@ export default function ProfileScreen() {
         source={require('../../assets/images/bg.jpeg')}
       >
         <View style={styles.box}>
-          <Button />
           <View style={{ alignSelf: 'flex-end' }}>
             <Entypo
               name="log-out"
@@ -59,7 +64,45 @@ export default function ProfileScreen() {
           <Text style={styles.nameUser}>{nickName}</Text>
         </View>
       </ImageBackground>
-      <FlatList style={{ backgroundColor: COLORS.primaryBg }}></FlatList>
+      <FlatList
+        style={{ backgroundColor: COLORS.primaryBg }}
+        data={allPosts}
+        keyExtractor={(item, indx) => indx.toString()}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              marginBottom: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Image
+              source={{ uri: item.photo }}
+              style={{ width: 350, height: 200 }}
+            />
+            <View>
+              <Button
+                title="Перейти до карт"
+                onPress={() =>
+                  navigation.navigate('Карта', { location: item.location })
+                }
+              />
+              <View>
+                <Text>{item.name}</Text>
+                <Button
+                  title="Перейти до коментарів"
+                  onPress={() =>
+                    navigation.navigate('Коментарі', {
+                      postId: item.id,
+                      uri: item.photo,
+                    })
+                  }
+                />
+              </View>
+            </View>
+          </View>
+        )}
+      />
     </>
   );
 }
