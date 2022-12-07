@@ -43,6 +43,7 @@ export default function CreatePostsScreen({ navigation }) {
     let savePhoto = () => {
       MediaLibrary.saveToLibraryAsync(photo).then(() => {
         navigation.navigate('Пост', { photo });
+		  setPhoto(null);
       });
     };
 

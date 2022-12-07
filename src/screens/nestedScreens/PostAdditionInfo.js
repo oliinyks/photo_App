@@ -27,7 +27,8 @@ export default function PostAdditionInfo({ navigation, route }) {
   const [name, setName] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  let { photo } = route.params;
+  const [photo, setPhoto] = useState(route.params.photo);
+//   let photo = route.params.photo;
 
   const { userId, nickName } = useSelector(state => state.auth);
 
@@ -61,7 +62,9 @@ export default function PostAdditionInfo({ navigation, route }) {
     uploadPostToServer();
     Keyboard.dismiss();
     navigation.navigate('DefaultScreenPosts', { photo });
-    photo = null;
+    setPhoto(null);
+	 setLocation(null);
+	 setName(null);
   }
 
   const uploadPostToServer = async () => {
@@ -116,12 +119,13 @@ export default function PostAdditionInfo({ navigation, route }) {
                 color="#BDBDBD"
                 style={styles.icon}
               />
-              <TextInput
+				  <Text style={styles.locationInput}>{text}</Text>
+              {/* <TextInput
                 onChangeText={setLocation}
                 style={styles.locationInput}
                 //  placeholder={text}
                 value={text}
-              />
+              /> */}
             </View>
           </View>
           <TouchableOpacity

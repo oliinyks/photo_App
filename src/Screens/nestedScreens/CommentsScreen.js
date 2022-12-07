@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   FlatList,
 } from 'react-native';
+import { AntDesign } from '@expo/vector-icons'; 
 import COLORS from '../../conts/colors';
 import { db } from '../../firebase/config';
 import { useSelector } from 'react-redux';
@@ -58,7 +59,7 @@ export default function CommentsScreen({ route }) {
 			keyExtractor={(item) => item.id}
 			/>
 		</SafeAreaView>
-      <View style={styles.form}>
+      <View style={styles.inputBox}>
         <TextInput
           onChangeText={setComment}
           style={styles.input}
@@ -70,7 +71,7 @@ export default function CommentsScreen({ route }) {
           activeOpacity={0.8}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>Опублікувати</Text>
+			<AntDesign name="arrowup" size={24} color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -87,11 +88,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
+	flex:1,
     paddingBottom: 15,
     paddingTop: 15,
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderColor: COLORS.secondaryText,
     fontSize: 16,
+	},
+	inputBox:{
+		marginBottom: 15,
+		borderColor: COLORS.secondaryText,
+		borderBottomWidth: 1,
+  },
+  button:{
+backgroundColor: COLORS.accent,
+height: 34,
+width: 34,
+alignItems: 'center',
   },
 });
