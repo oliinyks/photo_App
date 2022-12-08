@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
 import './src/firebase/config';
 import Main from './src/components/Main';
+// import {AsyncStorage} from '@react-native-async-storage/async-storage';
 
 export default function App() {
   const [fontsLoaded] = useFonts({

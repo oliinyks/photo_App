@@ -119,13 +119,11 @@ export default function PostAdditionInfo({ navigation, route }) {
                 color="#BDBDBD"
                 style={styles.icon}
               />
-				  <Text style={styles.locationInput}>{text}</Text>
-              {/* <TextInput
-                onChangeText={setLocation}
+              <TextInput
+               //  onChangeText={setLocation}
                 style={styles.locationInput}
-                //  placeholder={text}
-                value={text}
-              /> */}
+                 placeholder='Локація...'
+              />
             </View>
           </View>
           <TouchableOpacity
